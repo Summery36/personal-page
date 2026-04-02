@@ -243,7 +243,7 @@ export function ChatSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 h-[500px]">
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 h-[450px]">
           {/* 桌面端对话历史 */}
           <div className="hidden lg:block">
             <Card className="h-full overflow-hidden border-border bg-card">
