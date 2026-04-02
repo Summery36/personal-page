@@ -5,6 +5,15 @@ export interface ChatMessage {
   timestamp: number;
 }
 
+// 对话会话类型
+export interface Conversation {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  createdAt: number;
+  updatedAt: number;
+}
+
 // 聊天请求类型
 export interface ChatRequest {
   messages: Array<{
