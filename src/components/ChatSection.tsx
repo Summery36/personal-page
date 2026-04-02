@@ -19,7 +19,7 @@ export function ChatSection() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content: '你好！我是张明峰的数字分身,你可以问我任何关于他的问题 :)',
+      content: '你好！我是张明峰，有什么想了解的可以随时问我 😊',
       timestamp: Date.now(),
     },
   ]);
