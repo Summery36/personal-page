@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu } from 'lucide-react';
+import { Menu, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -45,17 +45,22 @@ export function Navigation() {
           </button>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <button
-                key={link.id}
-                type="button"
-                onClick={() => scrollToSection(link.id)}
-                className="text-foreground/70 hover:text-primary transition-colors font-medium"
-              >
-                {link.label}
-              </button>
-            ))}
+          <div className="hidden md:flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => scrollToSection('about')}
+              className="text-foreground/70 hover:text-primary transition-colors font-medium"
+            >
+              关于我
+            </button>
+            <Button
+              onClick={() => scrollToSection('chat')}
+              size="sm"
+              className="gap-2"
+            >
+              <MessageSquare className="h-4 w-4" />
+              数字分身
+            </Button>
           </div>
 
           {/* Mobile Navigation */}
