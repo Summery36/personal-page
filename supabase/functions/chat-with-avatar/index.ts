@@ -44,9 +44,20 @@ Deno.serve(async (req) => {
       );
     }
 
+    const modelGatewayUrl = Deno.env.get('MODEL_GATEWAY_URL');
+    if (!modelGatewayUrl) {
+      return new Response(
+        JSON.stringify({ error: '模型网关地址未配置' }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     // 调用文心大模型 API
     const response = await fetch(
-      'https://app-ajo7v23g7qwx-api-zYkZz8qovQ1L-gateway.appmiaoda.com/v2/chat/completions',
+      modelGatewayUrl,
       {
         method: 'POST',
         headers: {
