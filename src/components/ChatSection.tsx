@@ -266,7 +266,10 @@ export function ChatSection() {
   };
 
   return (
-    <section id="chat" className="bg-secondary/30 px-4 pt-14 pb-10 md:pt-16 md:pb-12">
+    <section
+      id="chat"
+      className="flex min-h-screen items-center bg-secondary/30 px-4 py-20 md:py-24"
+    >
       <div className="container mx-auto max-w-7xl">
         <div className="mb-7 text-center md:mb-8">
           <h2 className="mb-3 text-3xl font-bold text-primary md:text-4xl">
@@ -277,7 +280,7 @@ export function ChatSection() {
           </p>
         </div>
 
-        <div className="grid h-[430px] grid-cols-1 gap-4 lg:grid-cols-[280px_1fr]">
+        <div className="grid h-[460px] grid-cols-1 gap-4 lg:grid-cols-[280px_1fr]">
           <div className="hidden lg:block">
             <Card className="h-full overflow-hidden border-border bg-card">
               <ConversationHistory
@@ -286,7 +289,7 @@ export function ChatSection() {
                 onSelectConversation={handleSelectConversation}
                 onNewConversation={handleNewConversation}
                 onDeleteConversation={handleDeleteConversation}
-                listClassName="max-h-[350px] flex-none"
+                listClassName="max-h-[380px] flex-none"
               />
             </Card>
           </div>
@@ -309,7 +312,7 @@ export function ChatSection() {
                     onSelectConversation={handleSelectConversation}
                     onNewConversation={handleNewConversation}
                     onDeleteConversation={handleDeleteConversation}
-                    listClassName="max-h-[350px] flex-none"
+                    listClassName="max-h-[380px] flex-none"
                   />
                 </SheetContent>
               </Sheet>

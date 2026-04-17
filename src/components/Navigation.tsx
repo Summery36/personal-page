@@ -24,6 +24,8 @@ export function Navigation() {
 
   const navLinks = [
     { id: 'about', label: '关于我' },
+    { id: 'works', label: '作品' },
+    { id: 'contact', label: '联系' },
     { id: 'chat', label: '数字分身' },
   ];
 
@@ -52,6 +54,20 @@ export function Navigation() {
               className="text-foreground/70 hover:text-primary transition-colors font-medium"
             >
               关于我
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection('works')}
+              className="text-foreground/70 hover:text-primary transition-colors font-medium"
+            >
+              作品
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection('contact')}
+              className="text-foreground/70 hover:text-primary transition-colors font-medium"
+            >
+              联系
             </button>
             <Button
               onClick={() => scrollToSection('chat')}
