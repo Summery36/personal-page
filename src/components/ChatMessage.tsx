@@ -4,13 +4,21 @@ import { User, Bot } from 'lucide-react';
 
 interface ChatMessageProps {
   message: ChatMessage;
+  animate?: boolean;
 }
 
-export function ChatMessageComponent({ message }: ChatMessageProps) {
+export function ChatMessageComponent({
+  message,
+  animate = true,
+}: ChatMessageProps) {
   const isUser = message.role === 'user';
 
   return (
-    <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'} animate-fade-in`}>
+    <div
+      className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'} ${
+        animate ? 'animate-fade-in' : ''
+      }`}
+    >
       {/* 头像 */}
       <Avatar className="h-8 w-8 shrink-0">
         <AvatarFallback className={isUser ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}>

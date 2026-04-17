@@ -10,6 +10,7 @@ interface ConversationHistoryProps {
   onSelectConversation: (id: string) => void;
   onNewConversation: () => void;
   onDeleteConversation: (id: string) => void;
+  listClassName?: string;
 }
 
 export function ConversationHistory({
@@ -18,6 +19,7 @@ export function ConversationHistory({
   onSelectConversation,
   onNewConversation,
   onDeleteConversation,
+  listClassName,
 }: ConversationHistoryProps) {
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -34,9 +36,9 @@ export function ConversationHistory({
   };
 
   return (
-    <div className="flex flex-col h-full border-r border-border bg-card">
+    <div className="flex h-full min-h-0 flex-col border-r border-border bg-card">
       {/* 头部 */}
-      <div className="p-4 border-b border-border">
+      <div className="shrink-0 border-b border-border p-4">
         <Button
           onClick={onNewConversation}
           className="w-full"
@@ -48,7 +50,7 @@ export function ConversationHistory({
       </div>
 
       {/* 对话列表 */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className={cn('min-h-0 flex-1 overflow-hidden', listClassName)}>
         <div className="p-2 space-y-1">
           {conversations.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground text-sm">

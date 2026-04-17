@@ -14,19 +14,36 @@ import { toast } from 'sonner';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// 系统提示词
-const SYSTEM_PROMPT = `你是张明峰本人。你是一个软件工程专业大四应届毕业生，正在准备私企和央国企的春招，同时在做毕业设计。你的兴趣方向是AI开发，关心AI的最新发展以及如何用AI做出有用的产品。你有一个比较有记忆点的特点是会吹笛子。请以第一人称"我"来回答访客的问题，语气自然、简洁、友好。`;
+const SYSTEM_PROMPT = `你是张明峰本人。你目前正在准备 AI 应用开发方向的实习，重点关注大厂或高质量团队的机会。你将于 2026 年 9 月进入华东师范大学大数据专业攻读硕士。你的兴趣集中在大语言模型、Agent、RAG、数据能力与产品落地的结合，希望做出真正有用户价值的 AI 应用。请以第一人称“我”来回答访客问题，语气自然、简洁、友好，内容尽量真实、具体，不夸大。`;
 
-// 生成对话标题
 const generateConversationTitle = (firstUserMessage: string): string => {
-  const maxLength = 20;
-  if (firstUserMessage.length <= maxLength) {
-    return firstUserMessage;
-  }
-  return firstUserMessage.slice(0, maxLength) + '...';
+  const normalizedMessage = firstUserMessage
+    .replace(/\s+/g, '')
+    .replace(/^[，。！？,.!?：:；;、]+|[，。！？,.!?：:；;、]+$/g, '');
+
+  const simplifiedMessage = normalizedMessage
+    .replace(
+      /^(你好|您好|请问|请教一下|请教|我想问|我想问问|我想了解|想了解|帮我|请帮我|麻烦帮我|请你|麻烦你|可以帮我|能帮我|可以|能不能)/,
+      ''
+    )
+    .replace(/(吗|呢|呀|啊|一下)$/u, '');
+
+  const primarySegment =
+    simplifiedMessage.split(/[，。！？,.!?：:；;\n]/)[0] || simplifiedMessage;
+
+  const summary = primarySegment.slice(0, 10);
+  return summary || '新对话';
 };
 
-// 创建新对话
+const getConversationTitle = (messages: ChatMessage[]): string => {
+  const firstUserMessage = messages.find((message) => message.role === 'user');
+  if (!firstUserMessage) {
+    return '新对话';
+  }
+
+  return generateConversationTitle(firstUserMessage.content);
+};
+
 const createNewConversation = (): Conversation => {
   return {
     id: Date.now().toString(),
@@ -34,7 +51,8 @@ const createNewConversation = (): Conversation => {
     messages: [
       {
         role: 'assistant',
-        content: '你好！我是张明峰，有什么想了解的可以随时问我 😊',
+        content:
+          '你好！我是张明峰，正在准备 AI 应用开发实习，也会在 2026 年 9 月去华东师范大学读大数据硕士。有什么想了解的可以直接问我。',
         timestamp: Date.now(),
       },
     ],
@@ -43,12 +61,34 @@ const createNewConversation = (): Conversation => {
   };
 };
 
+const latestConversationHasUserQuestion = (
+  savedConversations: Conversation[]
+): boolean => {
+  const latestConversation = savedConversations[0];
+  if (!latestConversation) {
+    return false;
+  }
+
+  return latestConversation.messages.some((message) => message.role === 'user');
+};
+
 export function ChatSection() {
   const [conversations, setConversations] = useState<Conversation[]>(() => {
     const saved = localStorage.getItem('chat-conversations');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved) as Conversation[];
+        if (!Array.isArray(parsed) || parsed.length === 0) {
+          return [createNewConversation()];
+        }
+        const normalizedConversations = parsed.map((conversation) => ({
+          ...conversation,
+          title: getConversationTitle(conversation.messages),
+        }));
+
+        return latestConversationHasUserQuestion(normalizedConversations)
+          ? [createNewConversation(), ...normalizedConversations]
+          : normalizedConversations;
       } catch {
         return [createNewConversation()];
       }
@@ -63,40 +103,39 @@ export function ChatSection() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
+  const [streamedAssistantMessageTimestamps, setStreamedAssistantMessageTimestamps] =
+    useState<Set<number>>(() => new Set());
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const currentConversation = conversations.find((c) => c.id === currentConversationId);
   const messages = currentConversation?.messages || [];
 
-  // 保存对话到 localStorage
   useEffect(() => {
     localStorage.setItem('chat-conversations', JSON.stringify(conversations));
   }, [conversations]);
 
-  // 自动滚动到底部
   useEffect(() => {
     if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      const scrollContainer = scrollAreaRef.current.querySelector(
+        '[data-radix-scroll-area-viewport]'
+      );
       if (scrollContainer) {
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
       }
     }
   }, [messages, streamingContent]);
 
-  // 新建对话
   const handleNewConversation = () => {
     const newConversation = createNewConversation();
     setConversations((prev) => [newConversation, ...prev]);
     setCurrentConversationId(newConversation.id);
   };
 
-  // 切换对话
   const handleSelectConversation = (id: string) => {
     setCurrentConversationId(id);
   };
 
-  // 删除对话
   const handleDeleteConversation = (id: string) => {
     setConversations((prev) => {
       const filtered = prev.filter((c) => c.id !== id);
@@ -112,19 +151,15 @@ export function ChatSection() {
     });
   };
 
-  // 更新当前对话
   const updateCurrentConversation = (updater: (conv: Conversation) => Conversation) => {
     setConversations((prev) =>
-      prev.map((conv) =>
-        conv.id === currentConversationId ? updater(conv) : conv
-      )
+      prev.map((conv) => (conv.id === currentConversationId ? updater(conv) : conv))
     );
   };
 
   const handleSend = async () => {
     const trimmedInput = input.trim();
-    
-    // 验证输入
+
     if (!trimmedInput) {
       const textarea = document.querySelector('textarea');
       if (textarea) {
@@ -138,16 +173,14 @@ export function ChatSection() {
       return;
     }
 
-    // 添加用户消息
     const userMessage: ChatMessage = {
       role: 'user',
       content: trimmedInput,
       timestamp: Date.now(),
     };
 
-    // 更新对话标题（如果是第一条用户消息）
     const isFirstUserMessage = messages.filter((m) => m.role === 'user').length === 0;
-    
+
     updateCurrentConversation((conv) => ({
       ...conv,
       title: isFirstUserMessage ? generateConversationTitle(trimmedInput) : conv.title,
@@ -158,12 +191,9 @@ export function ChatSection() {
     setInput('');
     setIsLoading(true);
     setStreamingContent('');
-
-    // 创建中断控制器
     abortControllerRef.current = new AbortController();
 
     try {
-      // 准备消息历史
       const chatMessages = [
         { role: 'system' as const, content: SYSTEM_PROMPT },
         ...messages.map((msg) => ({
@@ -192,13 +222,17 @@ export function ChatSection() {
           }
         },
         onComplete: () => {
-          // 添加助手消息
           if (accumulatedContent) {
             const assistantMessage: ChatMessage = {
               role: 'assistant',
               content: accumulatedContent,
               timestamp: Date.now(),
             };
+            setStreamedAssistantMessageTimestamps((prev) => {
+              const next = new Set(prev);
+              next.add(assistantMessage.timestamp);
+              return next;
+            });
             updateCurrentConversation((conv) => ({
               ...conv,
               messages: [...conv.messages, assistantMessage],
@@ -232,19 +266,18 @@ export function ChatSection() {
   };
 
   return (
-    <section id="chat" className="py-20 px-4 bg-secondary/30">
+    <section id="chat" className="bg-secondary/30 px-4 pt-14 pb-10 md:pt-16 md:pb-12">
       <div className="container mx-auto max-w-7xl">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-primary">
+        <div className="mb-7 text-center md:mb-8">
+          <h2 className="mb-3 text-3xl font-bold text-primary md:text-4xl">
             和我的数字分身聊聊
           </h2>
-          <p className="text-muted-foreground">
-            有什么想了解的，尽管问我
+          <p className="mx-auto max-w-2xl text-muted-foreground">
+            想了解我的方向、经历和求职计划，可以直接问我
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 h-[450px]">
-          {/* 桌面端对话历史 */}
+        <div className="grid h-[430px] grid-cols-1 gap-4 lg:grid-cols-[280px_1fr]">
           <div className="hidden lg:block">
             <Card className="h-full overflow-hidden border-border bg-card">
               <ConversationHistory
@@ -253,13 +286,12 @@ export function ChatSection() {
                 onSelectConversation={handleSelectConversation}
                 onNewConversation={handleNewConversation}
                 onDeleteConversation={handleDeleteConversation}
+                listClassName="max-h-[350px] flex-none"
               />
             </Card>
           </div>
 
-          {/* 聊天区域 */}
           <Card className="overflow-hidden border-border bg-card flex flex-col">
-            {/* 移动端对话历史按钮 */}
             <div className="lg:hidden p-3 border-b border-border flex items-center justify-between">
               <h3 className="font-semibold text-foreground">
                 {currentConversation?.title || '新对话'}
@@ -277,21 +309,31 @@ export function ChatSection() {
                     onSelectConversation={handleSelectConversation}
                     onNewConversation={handleNewConversation}
                     onDeleteConversation={handleDeleteConversation}
+                    listClassName="max-h-[350px] flex-none"
                   />
                 </SheetContent>
               </Sheet>
             </div>
 
-            {/* 消息列表 */}
             <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
               <div className="space-y-4">
-                {messages.map((message, index) => (
-                  <ChatMessageComponent key={index} message={message} />
+                {messages.map((message) => (
+                  <ChatMessageComponent
+                    key={`${message.role}-${message.timestamp}-${message.content}`}
+                    message={message}
+                    animate={
+                      !(
+                        message.role === 'assistant' &&
+                        streamedAssistantMessageTimestamps.has(message.timestamp)
+                      )
+                    }
+                  />
                 ))}
-                
-                {/* 流式输出中的消息 */}
+
                 {streamingContent && (
                   <ChatMessageComponent
+                    key="streaming-assistant-message"
+                    animate={false}
                     message={{
                       role: 'assistant',
                       content: streamingContent,
@@ -300,7 +342,6 @@ export function ChatSection() {
                   />
                 )}
 
-                {/* 加载状态 */}
                 {isLoading && !streamingContent && (
                   <div className="flex gap-3">
                     <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center">
@@ -318,14 +359,13 @@ export function ChatSection() {
               </div>
             </ScrollArea>
 
-            {/* 输入区域 */}
             <div className="border-t border-border p-4 bg-background">
               <div className="flex gap-2">
                 <Textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="输入你的问题..."
+                  placeholder="输入你想了解的问题..."
                   className="min-h-[60px] max-h-[120px] resize-none"
                   disabled={isLoading}
                 />

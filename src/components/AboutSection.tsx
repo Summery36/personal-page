@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Briefcase, Sparkles, Music, ChevronRight } from 'lucide-react';
+import { Briefcase, Sparkles, GraduationCap, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
@@ -27,48 +27,51 @@ export function AboutSection() {
     {
       icon: Briefcase,
       title: '现在主要在做',
-      content: '私企和央国企的春招准备',
+      content: '冲刺 AI 应用开发实习',
       color: 'text-primary',
       details: {
-        subtitle: '求职准备中',
-        description: '目前正在积极准备2026年春季校园招聘，目标是进入优秀的私企或央国企，开启职业生涯。',
+        subtitle: '以大厂实习机会为重点',
+        description:
+          '目前正在系统准备 AI 应用开发相关实习，优先关注大厂或高质量团队，希望在正式读研前进入真实业务场景，持续打磨工程与产品能力。',
         highlights: [
-          '准备私企技术岗位面试，重点关注互联网大厂和创新型企业',
-          '准备央国企笔试和面试，了解国企文化和工作模式',
-          '同时进行毕业设计，确保顺利毕业',
-          '持续学习和提升技术能力，保持竞争力',
+          '重点投递 AI 应用开发、Agent、LLM 应用和相关工程岗位',
+          '系统准备前端、全栈工程能力，以及模型应用落地相关面试内容',
+          '通过个人项目持续展示从想法到可运行产品的实现能力',
+          '希望进入节奏快、要求高的团队积累真实业务经验',
         ],
       },
     },
     {
       icon: Sparkles,
       title: '兴趣方向',
-      content: 'AI 开发',
+      content: 'AI 应用开发',
       color: 'text-primary',
       details: {
-        subtitle: '人工智能开发',
-        description: '对人工智能技术充满热情，关注AI领域的最新发展，希望能够用AI技术开发出真正有用的产品。',
+        subtitle: '把模型能力做成真实产品',
+        description:
+          '我关注的不是停留在模型概念层面，而是如何把 LLM、Agent 和数据能力组合成真正可用、可交付、能解决问题的 AI 产品。',
         highlights: [
-          '关注大语言模型（LLM）的最新进展和应用',
-          '学习机器学习和深度学习相关技术',
-          '探索AI在实际场景中的应用可能性',
-          '思考如何用AI解决真实问题，创造价值',
+          '持续关注大语言模型、Agent、RAG 和工作流编排的实际应用',
+          '重视提示工程、效果评估和用户体验之间的平衡',
+          '希望把前端交互、后端服务和模型能力串成完整产品闭环',
+          '更在意 AI 是否真正解决真实问题，而不是只做概念展示',
         ],
       },
     },
     {
-      icon: Music,
-      title: '有记忆点的特点',
-      content: '会吹笛子',
+      icon: GraduationCap,
+      title: '下一阶段',
+      content: '2026 年 9 月入学华东师大大数据硕士',
       color: 'text-primary',
       details: {
-        subtitle: '笛子演奏爱好者',
-        description: '从小学习笛子演奏，这是我的一个特别爱好。音乐让我在紧张的学习和工作之余找到放松和平衡。',
+        subtitle: '研究生阶段规划',
+        description:
+          '我将在 2026 年 9 月进入华东师范大学大数据专业攻读硕士，希望继续强化数据、算法与工程结合的能力，同时保持对 AI 应用方向的长期投入。',
         highlights: [
-          '多年笛子演奏经验，掌握多种曲目',
-          '参加过学校文艺演出和社团活动',
-          '音乐培养了我的耐心和专注力',
-          '通过音乐结识了很多志同道合的朋友',
+          '在读研阶段继续围绕 AI 应用、数据智能和系统能力积累',
+          '希望把课程研究与真实产品问题结合起来，而不是停留在纸面',
+          '持续完善项目作品集、技术表达和工程落地能力',
+          '长期目标是做出真正有用户价值的 AI 产品',
         ],
       },
     },
@@ -76,36 +79,36 @@ export function AboutSection() {
 
   return (
     <>
-      <section id="about" className="py-20 px-4 bg-background">
+      <section id="about" className="flex min-h-screen items-center bg-background px-4 py-24 md:py-28">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-primary">
+          <div className="mb-16 text-center md:mb-20">
+            <h2 className="mb-5 text-3xl font-bold text-primary md:text-4xl">
               关于我
             </h2>
-            <p className="text-muted-foreground">
-              了解更多关于我的信息
+            <p className="mx-auto max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
+              了解更多关于我的背景、方向和下一阶段计划
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-7">
             {infoItems.map((item, index) => {
               const Icon = item.icon;
               return (
                 <Card
                   key={index}
-                  className="group hover:shadow-hover transition-all duration-300 hover:-translate-y-1 border-border bg-card cursor-pointer"
+                  className="group h-full cursor-pointer border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-hover"
                   onClick={() => setSelectedInfo(item)}
                 >
-                  <CardContent className="p-6 text-center">
-                    <div className="flex justify-center mb-4">
-                      <div className="p-3 rounded-full bg-secondary">
+                  <CardContent className="flex h-full min-h-[260px] flex-col items-center justify-center p-8 text-center md:min-h-[300px] md:p-9">
+                    <div className="mb-6 flex justify-center">
+                      <div className="rounded-full bg-secondary p-3.5">
                         <Icon className={`h-8 w-8 ${item.color}`} />
                       </div>
                     </div>
-                    <h3 className="text-lg font-semibold mb-2 text-foreground">
+                    <h3 className="mb-3 text-xl font-semibold text-foreground">
                       {item.title}
                     </h3>
-                    <p className="text-muted-foreground leading-relaxed mb-3">
+                    <p className="mb-5 text-sm leading-7 text-muted-foreground md:text-base">
                       {item.content}
                     </p>
                     <div className="flex items-center justify-center gap-1 text-sm text-primary font-medium">
@@ -120,7 +123,6 @@ export function AboutSection() {
         </div>
       </section>
 
-      {/* 详情对话框 */}
       <Dialog open={!!selectedInfo} onOpenChange={() => setSelectedInfo(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
@@ -135,7 +137,7 @@ export function AboutSection() {
               )}
             </DialogTitle>
           </DialogHeader>
-          
+
           {selectedInfo && (
             <div className="space-y-6 pt-4">
               <div>
